@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, minimum-scale=1">
+    <title>Holiarus: Прыжковое приключение</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            background-color: #111;
+        }
+
+        #playScreen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-image: url('img.jpg');
+            background-size: cover;
+            background-position: 100% 0; /* Начальная позиция фона - справа */
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            animation: moveBackground 30s linear infinite; /* Анимация движения фона слева */
+        }
+
+        @keyframes moveBackground {
+            from {
+                background-position: 100% 0; /* Начальная позиция - фон справа */
+            }
+            to {
+                background-position: 0 0; /* Конечная позиция - фон слева */
+            }
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.2));
+            z-index: 0;
+        }
+
+        #content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        #crystalsCount, #keysCount {
+            font-size: 20px;
+            letter-spacing: 1.2px;
+            animation: fadeIn 1.2s ease-in-out;
+            position: fixed; /* Меняем с absolute на fixed */
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.6); /* Черный полупрозрачный фон */
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+            z-index: 2;
+        }
+
+        #keysCount {
+            top: 60px; /* Смещаем вниз относительно блока с кристаллами */
+        }
+
+        #playButton {
+            background-color: #ff9800;
+            color: #fff;
+            padding: 20px 40px;
+            border: none;
+            font-size: 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.6);
+        }
+
+        #playButton:hover {
+            background-color: #e68900;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.8);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Анимация частиц */
+        .particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: moveParticles 10s linear infinite;
+        }
+
+        @keyframes moveParticles {
+            from {
+                transform: translateY(100vh);
+            }
+            to {
+                transform: translateY(-100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="playScreen">
+        <div id="overlay"></div>
+        <div id="content">
+            <div id="crystalsCount">кристаллов: <span id="totalCrystals">0</span></div>
+            <div id="keysCount">ключей: <span id="totalKeys">0</span></div> <!-- Новый блок для ключей -->
+            <button id="playButton">Играть</button>
+        </div>
+    </div>
+
+    <script>
+        // Для хранения общего количества кристаллов и ключей
+        let totalCrystals = localStorage.getItem('totalCrystals') || 0;
+        let totalKeys = localStorage.getItem('totalKeys') || 0;
+        
+        document.getElementById('totalCrystals').textContent = totalCrystals;
+        document.getElementById('totalKeys').textContent = totalKeys;
+
+        if (performance.navigation.type === 1) {
+            // Если страница была перезагружена, перенаправляем на index.html
+            window.location.href = 'index.html';
+        }
+
+        // Обработка клика по кнопке "Играть"
+        document.getElementById('playButton').addEventListener('click', function() {
+            window.location.href = 'game.html'; // Переход на страницу с игрой
+        });
+
+        // Обновление общего количества кристаллов и ключей после каждой игры
+        function updateTotalCrystalsAndKeys(newCrystals, newKeys) {
+            totalCrystals = parseInt(totalCrystals) + newCrystals;
+            totalKeys = parseInt(totalKeys) + newKeys;
+            localStorage.setItem('totalCrystals', totalCrystals);
+            localStorage.setItem('totalKeys', totalKeys);
+            document.getElementById('totalCrystals').textContent = totalCrystals;
+            document.getElementById('totalKeys').textContent = totalKeys;
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            // При загрузке страницы обновляем числа
+            let totalCrystals = localStorage.getItem('totalCrystals') || 0;
+            let totalKeys = localStorage.getItem('totalKeys') || 0;
+            document.getElementById('totalCrystals').textContent = totalCrystals;
+            document.getElementById('totalKeys').textContent = totalKeys;
+
+            // Создание плавающих частиц
+            for (let i = 0; i < 50; i++) {
+                let particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.width = Math.random() * 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                particle.style.opacity = Math.random();
+                document.getElementById('playScreen').appendChild(particle);
+            }
+        });
+    </script>
+
+</body>
+</html>
